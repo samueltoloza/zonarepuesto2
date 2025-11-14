@@ -1,83 +1,98 @@
-export const dynamic = 'force-dynamic' // defaults to auto
-import { hashPassword } from "@/lib";
-import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
-interface Params {
-    params: {
-        id: string;
-    };
-}
+const prisma = new PrismaClient();
 
-export async function GET(request: Request, { params }: Params) {
-    const { id } = params;
+// ============ GET ONE COMMODITY ============
+export async function GET(req: Request, { params }: { params: { id: string } }) {
     try {
-        const commodity = await prisma.commodity.findMany({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        if (!commodity) return NextResponse.json({ message: "commodity not found" }, { status: 404 });
-        return NextResponse.json(commodity[0]);
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
-        }
-    }
-}
-
-export async function PUT(request: Request, { params }: Params) {
-    const { id } = params;
-    const { name, description, quantity, price, suppliersId, headquartersId } = await request.json();
-    try {
+        const { id } = params;
         const commodity = await prisma.commodity.findUnique({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        if (!commodity) return NextResponse.json({ message: "commodity not found" }, { status: 404 });
-        const updatedCommodity = await prisma.commodity.update({
-            where: {
-                id: parseInt(id)
+            where: { id },
+            include: {
+                supplier: true,
+                headquarters: true,
+                inventory: {
+                    include: {
+                        headquarters: true,
+                    },
+                },
+                saleItems: {
+                    include: {
+                        sale: true,
+                    },
+                },
+                inventoryMoves: {
+                    include: {
+                        user: true,
+                        headquarters: true,
+                    },
+                },
             },
-            data: {
-                name: name ? name as string : commodity.name,
-                description: description ? description as string : commodity.description,
-                quantity: quantity ? quantity as number : commodity.quantity,
-                price: price ? price as number : commodity.price,
-                suppliersId: suppliersId ? suppliersId as string : commodity.suppliersId,
-                headquartersId: headquartersId ? headquartersId as number : commodity.headquartersId
-            }
         });
-        return NextResponse.json(updatedCommodity);
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
+
+        if (!commodity) {
+            return NextResponse.json(
+                { error: "Commodity not found" },
+                { status: 404 }
+            );
         }
+
+        return NextResponse.json(commodity, { status: 200 });
+    } catch (error) {
+        console.error("Error fetching commodity:", error);
+        return NextResponse.json(
+            { error: "Error fetching commodity" },
+            { status: 500 }
+        );
     }
 }
 
-export async function DELETE(request: Request, { params }: Params) {
-    const { id } = params;
+// ============ UPDATE COMMODITY ============
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
     try {
-        const commodity = await prisma.commodity.findUnique({
-            where: {
-                id: parseInt(id)
-            }
+        const { id } = params;
+        const { name, description, price, supplierId, headquartersId } = await req.json();
+
+        const updated = await prisma.commodity.update({
+            where: { id },
+            data: {
+                ...(name && { name }),
+                ...(description && { description }),
+                ...(price && { price: parseFloat(price) }),
+                ...(supplierId && { supplierId }),
+                ...(headquartersId && { headquartersId }),
+            },
+            include: {
+                supplier: true,
+                headquarters: true,
+            },
         });
-        if (!commodity) return NextResponse.json({ message: "commodity not found" }, { status: 404 });
-        await prisma.commodity.delete({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        return NextResponse.json({ message: "commodity deleted" });
+
+        return NextResponse.json(updated, { status: 200 });
+    } catch (error) {
+        console.error("Error updating commodity:", error);
+        return NextResponse.json(
+            { error: "Error updating commodity" },
+            { status: 500 }
+        );
     }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
-        }
+}
+
+// ============ DELETE COMMODITY ============
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+    try {
+        const { id } = params;
+        await prisma.commodity.delete({ where: { id } });
+        return NextResponse.json(
+            { message: "Commodity deleted successfully" },
+            { status: 200 }
+        );
+    } catch (error) {
+        console.error("Error deleting commodity:", error);
+        return NextResponse.json(
+            { error: "Error deleting commodity" },
+            { status: 500 }
+        );
     }
 }

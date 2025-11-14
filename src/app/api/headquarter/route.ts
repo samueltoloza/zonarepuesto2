@@ -1,33 +1,40 @@
-export const dynamic = 'force-dynamic' // defaults to auto
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma"
+import prisma from "@/lib/prisma";
 
-export async function GET(request: Request) {
+// ============ GET ALL HEADQUARTERS ============
+export async function GET() {
     try {
-        const suppliers = await prisma.headquarters.findMany();
-        return NextResponse.json(suppliers);
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
-        }
+        const headquarters = await prisma.headquarters.findMany({
+            include: {
+                commodities: true,
+                inventory: true,
+                sales: true,
+            },
+        });
+        return NextResponse.json(headquarters, { status: 200 });
+    } catch (error) {
+        console.error("Error fetching headquarters:", error);
+        return NextResponse.json({ error: "Error fetching headquarters" }, { status: 500 });
     }
 }
 
-export async function POST(request: Request) {
-    const { name, city } = await request.json();
+// ============ CREATE NEW HEADQUARTERS ============
+export async function POST(req: Request) {
     try {
-        const supplier = await prisma.headquarters.create({
-            data: {
-                name,
-                city
-            }
-        });
-        return NextResponse.json(supplier);
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
+        const body = await req.json();
+        const { name, city } = body;
+
+        if (!name || !city) {
+            return NextResponse.json({ error: "Name and city are required" }, { status: 400 });
         }
+
+        const newHQ = await prisma.headquarters.create({
+            data: { name, city },
+        });
+
+        return NextResponse.json(newHQ, { status: 201 });
+    } catch (error) {
+        console.error("Error creating headquarters:", error);
+        return NextResponse.json({ error: "Error creating headquarters" }, { status: 500 });
     }
 }

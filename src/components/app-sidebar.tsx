@@ -53,21 +53,21 @@ const data = {
   navMain: [
     {
       title: "Inventario",
-      url: "/inventory",
+      url: "/protected/inventory",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "Stock",
-          url: "/inventory/stock",
+          url: "/protected/inventory/stock",
         },
         {
-          title: "Stock Sin Bridge",
-          url: "/inventory/stocksinbirdge",
+          title: "Entradas de inventario",
+          url: "/protected/inventory/inventoryEntry",
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Salidas de inventario",
+          url: "/protected/inventory/inventoryExit",
         },
       ],
     },

@@ -2,7 +2,7 @@ import { User } from "../models";
 import bcrypt from "bcryptjs";
 
 export const getUserByDocument = async (document: number, password: string): Promise<User | null> => {
-    const res = await fetch(`${process.env.NEXTAUTH_URL}/api/user/${document}`, {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/api/user/${document}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -10,13 +10,12 @@ export const getUserByDocument = async (document: number, password: string): Pro
     });
 
     const user = await res.json();
-
     if (!user) {
         return null;
     }
 
     const isValid = await bcrypt.compare(password, user.password);
-
+    console.log(isValid);
     if (!isValid) {
         return null;
     }

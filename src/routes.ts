@@ -11,7 +11,10 @@ export const apiAuthPrefix = [
     "/api/auth",
     "/api/user",
     "/api/test",
-    "/api/inventory"
+    "/api/inventory",
+    "/api/headquarter",
+    "/api/supplier",
+    "/api/products",
 ]
 
-export const DEFAULT_LOGIN_REDIRECT = "/dashboard";
+export const DEFAULT_LOGIN_REDIRECT = "/protected/dashboard";

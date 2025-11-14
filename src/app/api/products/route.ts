@@ -1,37 +1,58 @@
-export const dynamic = 'force-dynamic' // defaults to auto
 import { NextResponse } from "next/server";
-import prisma from "@/lib/prisma"
+import prisma from "@/lib/prisma";
 
-export async function GET(request: Request) {
+// ============ GET ALL COMMODITIES ============
+export async function GET() {
     try {
-        const commodities = await prisma.commodity.findMany({ include: { headquarter: true, supplier: true } });
-        return NextResponse.json(commodities);
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
-        }
+        const commodities = await prisma.commodity.findMany({
+            include: {
+                supplier: true,
+                headquarters: true,
+                inventory: true,
+                saleItems: true,
+                inventoryMoves: true,
+            },
+        });
+        return NextResponse.json(commodities, { status: 200 });
+    } catch (error) {
+        console.error("Error fetching commodities:", error);
+        return NextResponse.json({ error: "Error fetching commodities" }, { status: 500 });
     }
 }
 
-export async function POST(request: Request) {
+// ============ CREATE NEW COMMODITY ============
+export async function POST(req: Request) {
     try {
-        const { name, description, suppliersId, headquartersId, quantity, price } = await request.json();
-        const commodity = await prisma.commodity.create({
-            data: {
-                name: name,
-                description: description,
-                suppliersId: suppliersId,
-                headquartersId: headquartersId,
-                quantity: quantity,
-                price: price
-            }
-        });
-        return NextResponse.json(commodity, { status: 201 });
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
+        const body = await req.json();
+        const { name, description, price, supplierId, headquartersId } = body;
+
+        if (!name || !description || !price) {
+            return NextResponse.json(
+                { error: "Name, description and price are required" },
+                { status: 400 }
+            );
         }
+
+        const newCommodity = await prisma.commodity.create({
+            data: {
+                name,
+                description,
+                price: parseFloat(price),
+                supplierId: supplierId || null,
+                headquartersId: headquartersId || null,
+            },
+            include: {
+                supplier: true,
+                headquarters: true,
+            },
+        });
+
+        return NextResponse.json(newCommodity, { status: 201 });
+    } catch (error) {
+        console.error("Error creating commodity:", error);
+        return NextResponse.json(
+            { error: "Error creating commodity" },
+            { status: 500 }
+        );
     }
 }

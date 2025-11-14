@@ -1,78 +1,58 @@
-export const dynamic = 'force-dynamic' // defaults to auto
-import { hashPassword } from "@/lib";
-import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
-interface Params {
-    params: {
-        id: string;
-    };
-}
+const prisma = new PrismaClient();
 
-export async function GET(request: Request, { params }: Params) {
-    const { id } = params;
+// ============ GET ONE HEADQUARTERS ============
+export async function GET(req: Request, { params }: { params: { id: string } }) {
     try {
-        const headquarters = await prisma.headquarters.findMany({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        if (!headquarters) return NextResponse.json({ message: "headquarters not found" }, { status: 404 });
-        return NextResponse.json(headquarters);
-    } catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
-        }
-    }
-}
-
-export async function PUT(request: Request, { params }: Params) {
-    const { id } = params;
-    const { name, city } = await request.json();
-    try {
+        const { id } = params;
         const headquarters = await prisma.headquarters.findUnique({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        if (!headquarters) return NextResponse.json({ message: "headquarters not found" }, { status: 404 });
-        const updatedHeadquarters = await prisma.headquarters.update({
-            where: {
-                id: parseInt(id)
+            where: { id },
+            include: {
+                commodities: true,
+                inventory: true,
+                sales: true,
             },
-            data: {
-                name: name ? name as string : headquarters.name,
-                city: city ? city as string : headquarters.city
-            }
         });
-        return NextResponse.json(updatedHeadquarters);
-    }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
+
+        if (!headquarters) {
+            return NextResponse.json({ error: "Headquarters not found" }, { status: 404 });
         }
+
+        return NextResponse.json(headquarters, { status: 200 });
+    } catch (error) {
+        console.error("Error fetching headquarters:", error);
+        return NextResponse.json({ error: "Error fetching headquarters" }, { status: 500 });
     }
 }
 
-export async function DELETE(request: Request, { params }: Params) {
-    const { id } = params;
+// ============ UPDATE HEADQUARTERS ============
+export async function PUT(req: Request, { params }: { params: { id: string } }) {
     try {
-        const headquarters = await prisma.headquarters.findUnique({
-            where: {
-                id: parseInt(id)
-            }
+        const { id } = params;
+        const { name, city } = await req.json();
+
+        const updated = await prisma.headquarters.update({
+            where: { id },
+            data: { name, city },
         });
-        if (!headquarters) return NextResponse.json({ message: "headquarters not found" }, { status: 404 });
-        await prisma.headquarters.delete({
-            where: {
-                id: parseInt(id)
-            }
-        });
-        return NextResponse.json({ message: "headquarters deleted" });
+
+        return NextResponse.json(updated, { status: 200 });
+    } catch (error) {
+        console.error("Error updating headquarters:", error);
+        return NextResponse.json({ error: "Error updating headquarters" }, { status: 500 });
     }
-    catch (error) {
-        if (error instanceof Error) {
-            return NextResponse.json({ message: error.message }, { status: 500 });
-        }
+}
+
+// ============ DELETE HEADQUARTERS ============
+export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+    try {
+        const { id } = params;
+        await prisma.headquarters.delete({ where: { id } });
+        return NextResponse.json({ message: "Headquarters deleted successfully" }, { status: 200 });
+    } catch (error) {
+        console.error("Error deleting headquarters:", error);
+        return NextResponse.json({ error: "Error deleting headquarters" }, { status: 500 });
     }
 }

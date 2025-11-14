@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // app/api/test/full-test/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '../../../../lib/prisma';
 import { InventarioBridge } from '../../../../lib/inventory/InventarioBridge';
 import { ImplementacionInventarioPrisma } from '../../../../lib/inventory/ImplementacionInventarioPrisma';
+import { hashPassword } from '@/lib';
 
 export async function GET(request: NextRequest) {
     const testResults: string[] = [];
@@ -20,7 +22,7 @@ export async function GET(request: NextRequest) {
                 document: 1052219872,
                 email: 'elsamueltoloza@gmail.com',
                 name: 'Samuel Toloza',
-                password: 'Samuel112001*'
+                password: await hashPassword('Samuel112001*')
             }
         });
         testResults.push('✅ Usuario creado');

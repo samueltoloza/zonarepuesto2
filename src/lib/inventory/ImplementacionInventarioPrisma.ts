@@ -68,16 +68,7 @@ export class ImplementacionInventarioPrisma implements ImplementacionInventario 
                 ]
             });
 
-            // Mapear para incluir todos los datos
-            console.log(items.map(item => ({
-                commodityId: item.commodityId,
-                headquartersId: item.headquartersId,
-                stock: item.stock,
-                commodity: item.commodity,           // Datos completos del commodity
-                headquarters: item.headquarters      // Datos completos de la sede
-            })));
-
-            return items.map(item => ({
+            return items.map((item: { commodityId: any; headquartersId: any; stock: any; commodity: any; headquarters: any; }) => ({
                 commodityId: item.commodityId,
                 headquartersId: item.headquartersId,
                 stock: item.stock,
@@ -87,6 +78,35 @@ export class ImplementacionInventarioPrisma implements ImplementacionInventario 
         } catch (error) {
             console.error('Error obteniendo todo el stock:', error);
             throw new Error('No se pudo obtener el stock completo');
+        }
+    }
+
+    async obtenerStockPorSede(headquartersId: string): Promise<any[]> {
+        try {
+            const items = await prisma.inventoryItem.findMany({
+                where: {
+                    headquartersId
+                },
+                include: {
+                    commodity: true,     // Incluir datos del commodity
+                    headquarters: true   // Incluir datos de la sede
+                },
+                orderBy: [
+                    { commodityId: 'asc' },
+                    { headquartersId: 'asc' }
+                ]
+            });
+
+            return items.map((item: { commodityId: any; headquartersId: any; stock: any; commodity: any; headquarters: any; }) => ({
+                commodityId: item.commodityId,
+                headquartersId: item.headquartersId,
+                stock: item.stock,
+                commodity: item.commodity,           // Datos completos del commodity
+                headquarters: item.headquarters      // Datos completos de la sede
+            }));
+        } catch (error) {
+            console.error('Error obteniendo stock por sede:', error);
+            throw new Error('No se pudo obtener el stock por sede');
         }
     }
 }
