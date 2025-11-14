@@ -12,7 +12,7 @@ interface Params {
 export async function GET(request: Request, { params }: Params) {
     const { id } = params;
     try {
-        const supplier = await prisma.suppliers.findMany({
+        const supplier = await prisma.supplier.findMany({
             where: {
                 id: id
             }
@@ -30,13 +30,13 @@ export async function PUT(request: Request, { params }: Params) {
     const { id } = params;
     const { name, email, document } = await request.json();
     try {
-        const supplier = await prisma.suppliers.findUnique({
+        const supplier = await prisma.supplier.findUnique({
             where: {
                 id: id
             }
         });
         if (!supplier) return NextResponse.json({ message: "Supplier not found" }, { status: 404 });
-        const updatedSupplier = await prisma.suppliers.update({
+        const updatedSupplier = await prisma.supplier.update({
             where: {
                 id: id
             },
@@ -58,13 +58,13 @@ export async function PUT(request: Request, { params }: Params) {
 export async function DELETE(request: Request, { params }: Params) {
     const { id } = params;
     try {
-        const supplier = await prisma.suppliers.findUnique({
+        const supplier = await prisma.supplier.findUnique({
             where: {
                 id: id
             }
         });
         if (!supplier) return NextResponse.json({ message: "Supplier not found" }, { status: 404 });
-        await prisma.suppliers.delete({
+        await prisma.supplier.delete({
             where: {
                 id: id
             }

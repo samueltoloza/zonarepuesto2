@@ -72,36 +72,32 @@ const data = {
       ],
     },
     {
-      title: "Models",
+      title: "Sedes",
       url: "#",
       icon: Bot,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "Consultar Sedes",
+          url: "/protected/headquarter/locations",
         },
         {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
+          title: "Crear Sede",
+          url: "/protected/headquarter/create",
+        }
       ],
     },
     {
-      title: "Documentation",
+      title: "Productos",
       url: "#",
       icon: BookOpen,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "Consultar Productos",
+          url: "/protected/product/locations",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Crear Producto",
+          url: "/protected/product/create",
         },
         {
           title: "Tutorials",
