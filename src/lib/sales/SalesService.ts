@@ -66,7 +66,6 @@ export class SalesService {
                     create: itemsConPrecio.map(item => ({
                         commodityId: item.commodityId,
                         quantity: item.quantity,
-                        price: item.price
                     }))
                 }
             }

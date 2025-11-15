@@ -98,38 +98,37 @@ const data = {
         {
           title: "Crear Producto",
           url: "/protected/product/create",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
+        }
       ],
     },
     {
-      title: "Settings",
+      title: "Proveedores",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Consultar Proveedores",
+          url: "/protected/supplier/locations",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Crear Proveedor",
+          url: "/protected/supplier/create",
+        }
+      ],
+    },
+    {
+      title: "Ventas",
+      url: "#",
+      icon: PieChart,
+      items: [
+        {
+          title: "Consultar Ventas",
+          url: "/protected/sales/locations",
         },
         {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
+          title: "Crear Venta",
+          url: "/protected/sales/create",
+        }
       ],
     },
   ],
